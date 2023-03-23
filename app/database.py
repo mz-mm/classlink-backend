@@ -29,11 +29,9 @@ class Student(Base):
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
     parent_id = Column(String, ForeignKey("parents.id", ondelete="CASCADE"), nullable=False)
+    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
 
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
-    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
-    homework_id = Column(String, ForeignKey("homeworks.id", ondelete="CASCADE"), nullable=False)
-
 
 
 class Parent(Base):
@@ -57,8 +55,6 @@ class Teacher(Base):
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
     last_subscription_fee = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
-    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
-
 
 class Class(Base):
     __tablename__ = "classes"
@@ -66,7 +62,7 @@ class Class(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     class_grade = Column(Integer, nullable=False)
     class_name = Column(String, nullable=False)
-    teacher_id = Column(Integer, ForeignKey("teacher.id", ondelete="CASCADE"), nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
 
 class Schedule(Base):
@@ -77,6 +73,14 @@ class Schedule(Base):
     day = Column(Integer, nullable=False)
     lesson_num = Column(Integer, nullable=False)
     subject = Column(String, nullable=False)
+
+
+class Subject(Base):
+    __tablename__ = "subjects"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String, nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
 
 class Attendance(Base):
@@ -94,6 +98,7 @@ class Grade(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     student_id = Column(Integer, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
     date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
 
 
 class Homework(Base):
@@ -104,10 +109,15 @@ class Homework(Base):
     description = Column(String, nullable=True)
     due_date = Column(TIMESTAMP, nullable=False)
     class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
-    # Add a subject colum for sorting
+    subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
 
 
-class UpcomingTest(Base):
-    pass
+class Test(Base):
+    __tablename__ = "tests"
 
-
+    id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    due_date = Column(TIMESTAMP, nullable=False)
+    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
