@@ -25,7 +25,6 @@ class Student(Base):
     __tablename__ = "students"
 
     id = Column(Integer, primary_key=True, nullable=False)
-
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
@@ -81,17 +80,26 @@ class Schedule(Base):
 
 
 class Attendance(Base):
-    pass
+    __tablename__ = "attendances"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    student_id = Column(Integer, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
+    date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    late = Column(Integer, nullable=True)
 
 
-class Grades(Base):
-    pass
+class Grade(Base):
+    __tablename__ = "grades"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    student_id = Column(Integer, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
+    date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
 
 class Homework(Base):
     __tablename__ = "homeworks"
 
     id = Column(Integer, primary_key=True, nullable=False)
-
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
     due_date = Column(TIMESTAMP, nullable=False)
