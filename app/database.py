@@ -21,6 +21,17 @@ def get_db():
         db.close()
 
 
+class Admin(Base):
+    __tablename__ = "admins"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    full_name = Column(String, nullable=False)
+
+    create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
+
+
 class Student(Base):
     __tablename__ = "students"
 
@@ -28,8 +39,9 @@ class Student(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
-    parent_id = Column(String, ForeignKey("parents.id", ondelete="CASCADE"), nullable=False)
-    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    parent_id = Column(Integer, ForeignKey("parents.id", ondelete="CASCADE"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    sector = Column(Enum("az", "ru", name="sector"), nullable=False)
 
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
 
@@ -43,7 +55,7 @@ class Parent(Base):
     full_name = Column(String, nullable=False)
 
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
-    last_subscription_fee = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+    last_subscription_fee = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()')) # Parents will have to pay for all their children together
 
 
 class Teacher(Base):
@@ -53,6 +65,8 @@ class Teacher(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
+    sector = Column(Enum("az", "ru", name="sector"), nullable=False)
+
     last_subscription_fee = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 
@@ -63,16 +77,18 @@ class Class(Base):
     class_grade = Column(Integer, nullable=False)
     class_name = Column(String, nullable=False)
     teacher_id = Column(Integer, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
+    sector = Column(Enum("az", "ru", name="sector"), nullable=False)
 
 
 class Schedule(Base):
     __tablename__ = "schedules"
 
     id = Column(Integer, primary_key=True, nullable=False)
-    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     day = Column(Integer, nullable=False)
-    lesson_num = Column(Integer, nullable=False)
+    lesson_num = Column(Integer, nullable=False) # A lesson num can only be from 1 to 6 as there are 6 lessons in a day
     subject = Column(String, nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
 
 class Subject(Base):
@@ -88,8 +104,10 @@ class Attendance(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     student_id = Column(Integer, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
-    date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     late = Column(Integer, nullable=True)
+    teacher_id = Column(Integer, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False) # Teacher who marked the attendance
+
+    date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 
 class Grade(Base):
@@ -97,8 +115,11 @@ class Grade(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     student_id = Column(Integer, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
-    date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
     subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+    grade = Column(Integer, nullable=False)
+    teacher_id = Column(Integer, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False) # Teacher who marked the grade
+
+    date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 
 class Homework(Base):
@@ -107,9 +128,10 @@ class Homework(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    due_date = Column(TIMESTAMP, nullable=False)
-    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+
+    due_date = Column(TIMESTAMP, nullable=False)
 
 
 class Test(Base):
@@ -118,6 +140,24 @@ class Test(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     title = Column(String, nullable=False)
     description = Column(String, nullable=True)
-    due_date = Column(TIMESTAMP, nullable=False)
-    class_id = Column(String, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
+    class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+
+    date = Column(TIMESTAMP, nullable=False)
+
+
+
+# ---- NOT READY FEATURE ----
+# class Message(Base):
+    # __tablename__ = "messages"
+# 
+    # id = Column(Integer, primary_key=True, nullable=False)
+    # title = Column(String, nullable=False)
+    # description = Column(String, nullable=True)
+# 
+    # date = Column(TIMESTAMP, nullable=False)    
+
+
+
+
+# Add a table for emails, emails are like post but allows for 1-1 communication between teachers, parents and students and even global announcements
