@@ -25,7 +25,7 @@ def get_db():
 class Admin(Base):
     __tablename__ = "admins"
 
-    id = Column(String, primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    id = Column(String, primary_key=True, default=str(uuid.uuid4()), server_default=text('uuid_generate_v4()'), unique=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
@@ -37,7 +37,7 @@ class Admin(Base):
 class Student(Base):
     __tablename__ = "students"
 
-    id = Column(String, primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    id = Column(String, primary_key=True, default=str(uuid.uuid4()), server_default=text('uuid_generate_v4()'), unique=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
@@ -51,8 +51,8 @@ class Student(Base):
 
 class Parent(Base):
     __tablename__ = "parents"
-
-    id = Column(String, primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    
+    id = Column(String, primary_key=True, default=str(uuid.uuid4()), server_default=text('uuid_generate_v4()'), unique=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
@@ -66,8 +66,9 @@ class Teacher(Base):
     __tablename__ = "teachers"
 
 
-    id = Column(String, primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    id = Column(String, primary_key=True, default=str(uuid.uuid4()), server_default=text('uuid_generate_v4()'), unique=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
+    full_name = Column(String, nullable=False)
     password = Column(String, nullable=False)
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
     sector = Column(Enum("az", "ru", name="sector"), nullable=False)
@@ -96,7 +97,7 @@ class Lesson(Base):
     lesson_num = Column(Integer, nullable=False) # A lesson num can only be from 1 to 6 as there are 6 lessons in a day
     subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
-
+    color = Column(String, nullable=False)
 
 
 class Subject(Base):
@@ -104,9 +105,6 @@ class Subject(Base):
 
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
-    color = Column(String, nullable=False)
-
-    schedule = relationship("lessons")
 
 
 
