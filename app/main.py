@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import *
+from routers import auth, user, schedule
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,6 +16,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth.router)
+app.include_router(schedule.router)
+app.include_router(user.router)
 
 @app.get("/")
 def root():
