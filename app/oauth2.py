@@ -6,8 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 from database import *
 from sqlalchemy.orm import Session
 from config import settings
+from typing import Union
 
-oath2_scheme = OAuth2PasswordBearer(tokenUrl='login')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/api/login')
 
 SECRET_KEY = settings.secret_key
 ALGORITHM = settings.algorithm
@@ -38,19 +39,19 @@ def verify_access_token(token: str, credentials_exception):
     
     return token_data
     
-def get_current_user(token: str = Depends(oath2_scheme),db: Session = Depends(get_db)):
+def get_current_user(token: str = Depends(oauth2_scheme),db: Session = Depends(get_db)):
     credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Could not validate crentials", headers={"WWW-Authenticate": "Bearer"})
 
     token = verify_access_token(token, credentials_exception)
-    user = db.query(Student).filter(Student.id == token.id).first()
+    user: Union[Student, Teacher, Parent, Admin] = db.query(Student).filter(Student.id == token.id).first() 
 
     if not user:
         user = db.query(Teacher).filter(Teacher.id == token.id).first()
     
-    elif not user:
+    if not user:
         user = db.query(Parent).filter(Parent.id == token.id).first()
     
-    elif not user:
+    if not user:
         user = db.query(Admin).filter(Admin.id == token.id).first()
     
     return user
