@@ -29,23 +29,25 @@ class TokenData(BaseModel):
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     
     user: Union[Student, Teacher, Parent, Admin] = db.query(Student).filter(Student.email == user_credentials.username).first()
-
+    role = "student"
+    
     if not user:
         user = db.query(Teacher).filter(Teacher.email == user_credentials.username).first()
-    
+        role = "teacher" 
     if not user:
         user = db.query(Parent).filter(Parent.email == user_credentials.username).first()
-    
+        role = "parent" 
     if not user:
         user = db.query(Admin).filter(Admin.email == user_credentials.username).first()
-
+        role = "admin"
+        
     if user is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
 
     if not verify(user_credentials.password, user.password):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=f"Invalid Credentials")
     
-    access_token = oauth2.create_access_token(data={"user_id": user.id})
+    access_token = oauth2.create_access_token(data={"user_id": user.id, "role": role})
 
     return {"access_token": access_token, "token_type": "bearer"}
 

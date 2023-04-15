@@ -94,17 +94,30 @@ class Lesson(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     day = Column(Integer, nullable=False)
-    lesson_num = Column(Integer, nullable=False) # A lesson num can only be from 1 to 6 as there are 6 lessons in a day
-    subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+
+    subject_1_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+    subject_2_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+    subject_3_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+    subject_4_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+    subject_5_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+    subject_6_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
+
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
-    color = Column(String, nullable=False)
+
+    subject_1 = relationship("Subject", primaryjoin="Lesson.subject_1_id == Subject.id")
+    subject_2 = relationship("Subject", primaryjoin="Lesson.subject_2_id == Subject.id")
+    subject_3 = relationship("Subject", primaryjoin="Lesson.subject_3_id == Subject.id")
+    subject_4 = relationship("Subject", primaryjoin="Lesson.subject_4_id == Subject.id")
+    subject_5 = relationship("Subject", primaryjoin="Lesson.subject_5_id == Subject.id")
+    subject_6 = relationship("Subject", primaryjoin="Lesson.subject_6_id == Subject.id")
 
 
 class Subject(Base):
     __tablename__ = "subjects"
-
+    # there also should be a null subject or a emtpy subject for example if in some days there only 5 or less lessons
     id = Column(Integer, primary_key=True, nullable=False)
     name = Column(String, nullable=False)
+    color = Column(String, nullable=False)
 
 
 
