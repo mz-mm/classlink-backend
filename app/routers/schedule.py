@@ -2,7 +2,7 @@ from typing import Optional, List, Union
 from fastapi import Depends, APIRouter 
 from pydantic import BaseModel
 from database import Lesson, get_db
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from database import *
 import oauth2
 
@@ -11,31 +11,36 @@ router = APIRouter(
 )
 
 class SubjectResponseModel(BaseModel):
+    id: int
     name: str
+    color: str
     
     class Config:
         orm_mode = True
 
 class LessonResponseModel(BaseModel):
     id: int
-    lesson_num : int
-    subject: SubjectResponseModel
-    day: str
-    color: str
+    class_id: int
+    day: int
+    subject_1_id: SubjectResponseModel
+    subject_2_id: SubjectResponseModel
+    subject_3_id: SubjectResponseModel
+    subject_4_id: SubjectResponseModel
+    subject_5_id: SubjectResponseModel
+    subject_6_id: SubjectResponseModel
+    teacher_id: str
 
     class Config:
         orm_mode = True
 
 
 @router.get("/api/lessons", response_model=List[LessonResponseModel])
-def get_lessons(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user), day: Optional[str] = None):
+def get_lessons(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user), day: Optional[int] = None):
 
-    user: Union[Student, Teacher, Parent, Admin] = db.query(Student).filter(Student.id == current_user.id).first()
-    query = db.query(Lesson).join(Subject).filter(Lesson.class_id == user.class_id)
+    lessons = db.query(Lesson).filter(Lesson.class_id == current_user.class_id)
     if day:
-        query = query.filter(Lesson.day == day)
-    
-    query = query.order_by(Lesson.day, Lesson.lesson_num)
-    lessons = query.all()
+        lessons = lessons.filter(Lesson.day == day)
+    lessons = lessons.all()
 
-    return lessons
+
+    return lessons 

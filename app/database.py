@@ -104,12 +104,12 @@ class Lesson(Base):
 
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
-    subject_1 = relationship("Subject", primaryjoin="Lesson.subject_1_id == Subject.id")
-    subject_2 = relationship("Subject", primaryjoin="Lesson.subject_2_id == Subject.id")
-    subject_3 = relationship("Subject", primaryjoin="Lesson.subject_3_id == Subject.id")
-    subject_4 = relationship("Subject", primaryjoin="Lesson.subject_4_id == Subject.id")
-    subject_5 = relationship("Subject", primaryjoin="Lesson.subject_5_id == Subject.id")
-    subject_6 = relationship("Subject", primaryjoin="Lesson.subject_6_id == Subject.id")
+    subject_1 = relationship("Subject", foreign_keys=[subject_1_id], lazy='subquery', uselist=False)
+    subject_2 = relationship("Subject", foreign_keys=[subject_2_id], lazy='subquery', uselist=False)
+    subject_3 = relationship("Subject", foreign_keys=[subject_3_id], lazy='subquery', uselist=False)
+    subject_4 = relationship("Subject", foreign_keys=[subject_4_id], lazy='subquery', uselist=False)
+    subject_5 = relationship("Subject", foreign_keys=[subject_5_id], lazy='subquery', uselist=False)
+    subject_6 = relationship("Subject", foreign_keys=[subject_6_id], lazy='subquery', uselist=False)
 
 
 class Subject(Base):
