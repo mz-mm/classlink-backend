@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status, HTTPException, responses
 from sqlalchemy.orm import Session
 from database import *
 from utils import verify
-import oauth2
+import oauth2 as oauth2
 from typing import Optional, Union
 
 
