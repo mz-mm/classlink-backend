@@ -16,15 +16,13 @@ class LessonModel(BaseModel):
     class_id: int
     day: int
     subjects: Optional[List[str]]
-    teacher_id: str
 
     class Config:
         orm_mode = True
 
 
-@router.get("/api/lessons")
-def get_lessons(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user),
-                day: Optional[int] = None):
+@router.get("/api/schedule")
+def get_lessons(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user), day: Optional[int] = None):
     query = db.query(Lesson).filter(Lesson.class_id == current_user.class_id)
     if day:
         query = query.filter(Lesson.day == day)
@@ -48,4 +46,5 @@ def get_lessons(db: Session = Depends(get_db), current_user: str = Depends(oauth
         lesson_model = LessonModel.from_orm(lesson)
         lesson_model.subjects = subjects
         lesson_models.append(lesson_model)
+
     return lesson_models
