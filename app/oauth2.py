@@ -1,6 +1,6 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from routers import auth
+from routers.utils import auth
 from fastapi import Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from database import *

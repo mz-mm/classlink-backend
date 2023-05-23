@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import *
-from routers import auth, user, schedule, admintools
+from routers.utils import auth, user
+from routers.general import schedule
+from routers.admin import admintools
 
 Base.metadata.create_all(bind=engine)
 

@@ -127,7 +127,7 @@ class Attendance(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     student_id = Column(String, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
     late = Column(Integer, nullable=True)
-    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False) # Teacher who marked the attendance
+    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
     date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
@@ -140,7 +140,7 @@ class SubjectGrade(Base):
     student_id = Column(String, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
     subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     grade = Column(Integer, nullable=False)
-    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False) # Teacher who marked the grade
+    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
     date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 

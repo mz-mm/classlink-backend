@@ -6,9 +6,9 @@ import oauth2 as oauth2
 from typing import Optional, Union
 
 
-router = APIRouter(
+router = APIRouter (
     tags=["User"]
-    )
+)
 
 
 @router.get("/api/user")
