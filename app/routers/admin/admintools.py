@@ -1,5 +1,4 @@
 from typing import Optional, List, Union
-
 from fastapi import Depends, APIRouter
 from pydantic import BaseModel
 from sqlalchemy.orm import Session

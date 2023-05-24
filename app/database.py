@@ -94,6 +94,7 @@ class Lesson(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     day = Column(Integer, nullable=False)
+    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
     subject_1_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     subject_2_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
@@ -102,7 +103,6 @@ class Lesson(Base):
     subject_5_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     subject_6_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
 
-    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
     subject_1 = relationship("Subject", foreign_keys=[subject_1_id], lazy='subquery', uselist=False)
     subject_2 = relationship("Subject", foreign_keys=[subject_2_id], lazy='subquery', uselist=False)

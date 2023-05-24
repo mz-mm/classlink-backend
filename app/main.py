@@ -4,6 +4,7 @@ from database import *
 from routers.utils import auth, user
 from routers.general import schedule
 from routers.admin import admintools
+from routers.teacher import attendance
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,10 +20,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Utils
 app.include_router(auth.router)
-app.include_router(schedule.router)
 app.include_router(user.router)
+
+# General
+app.include_router(schedule.router)
+
+# Teacher
+app.include_router(attendance.router)
+
+# Admin
 app.include_router(admintools.router)
+
 
 
 @app.get("/")

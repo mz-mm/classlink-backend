@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, status, HTTPException, responses
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database import *
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from utils import verify
-import oauth2 
+import oauth2
 from typing import Optional, Union
 
 router = APIRouter(
@@ -13,7 +13,7 @@ router = APIRouter(
 
 
 class LoginModel(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
