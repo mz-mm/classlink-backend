@@ -4,7 +4,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum, Sequence
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-from sqlalchemy.sql.expression import text
+from sqlalchemy.sql.expression import text, false
 from config import settings
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
@@ -94,7 +94,6 @@ class Lesson(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     day = Column(Integer, nullable=False)
-    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
     subject_1_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     subject_2_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
@@ -103,6 +102,7 @@ class Lesson(Base):
     subject_5_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     subject_6_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
 
+    teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
     subject_1 = relationship("Subject", foreign_keys=[subject_1_id], lazy='subquery', uselist=False)
     subject_2 = relationship("Subject", foreign_keys=[subject_2_id], lazy='subquery', uselist=False)
@@ -128,8 +128,9 @@ class Attendance(Base):
     student_id = Column(String, ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
     late = Column(Integer, nullable=True)
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
-
+    status = Column(Boolean, nullable=False, default=False) # True if present, False otherwise
     date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
+
 
 
 
