@@ -16,12 +16,16 @@ class SubjectResponsModel(BaseModel):
     name: str
     color: str
 
+    class Config:
+        orm_mode = True
+
 
 class LessonResponsModel(BaseModel):
     id: int
     class_id: int
     day: int
-    teacher_id: int
+    lesson_num: int
+    teacher_id: str
     subject: SubjectResponsModel
 
     class Config:
@@ -30,7 +34,7 @@ class LessonResponsModel(BaseModel):
 
 @router.get("/api/schedule", response_model=List[LessonResponsModel])
 def get_lessons(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user), day: Optional[int] = None):
-    lessons = db.query(Lesson).filter(Lesson.class_id == current_user.class_id)
+    lessons = db.query(Lesson).filter(Lesson.class_id == current_user.class_id).all()
 
     if day:
         lessons = lessons.filter(Lesson.day == day).all()
