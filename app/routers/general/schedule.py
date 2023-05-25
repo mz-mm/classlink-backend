@@ -1,10 +1,9 @@
-from typing import Optional, List, Union
-from fastapi import Depends, APIRouter, HTTPException
+from typing import Optional, List
+from fastapi import Depends, APIRouter
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import *
 import oauth2
-
 
 
 router = APIRouter(
@@ -12,40 +11,28 @@ router = APIRouter(
 )
 
 
-class LessonModel(BaseModel):
+class SubjectResponsModel(BaseModel):
+    id: int
+    name: str
+    color: str
+
+
+class LessonResponsModel(BaseModel):
     id: int
     class_id: int
     day: int
-    subjects: Optional[List[str]]
+    teacher_id: int
+    subject: SubjectResponsModel
 
     class Config:
         orm_mode = True
 
 
-@router.get("/api/schedule")
+@router.get("/api/schedule", response_model=List[LessonResponsModel])
 def get_lessons(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user), day: Optional[int] = None):
-    query = db.query(Lesson).filter(Lesson.class_id == current_user.class_id)
-    if day:
-        query = query.filter(Lesson.day == day)
-    lessons = query.order_by(
-        Lesson.day,
-        Lesson.subject_1_id,
-        Lesson.subject_2_id,
-        Lesson.subject_3_id,
-        Lesson.subject_4_id,
-        Lesson.subject_5_id,
-        Lesson.subject_6_id
-    ).all()
-    lesson_models = []
-    for lesson in lessons:
-        subjects = [
-            subject.name
-            for subject in
-            [lesson.subject_1, lesson.subject_2, lesson.subject_3, lesson.subject_4, lesson.subject_5, lesson.subject_6]
-            if subject is not None
-        ]
-        lesson_model = LessonModel.from_orm(lesson)
-        lesson_model.subjects = subjects
-        lesson_models.append(lesson_model)
+    lessons = db.query(Lesson).filter(Lesson.class_id == current_user.class_id)
 
-    return lesson_models
+    if day:
+        lessons = lessons.filter(Lesson.day == day).all()
+
+    return lessons

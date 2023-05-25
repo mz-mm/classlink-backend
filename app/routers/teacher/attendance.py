@@ -15,7 +15,7 @@ class StudentAttendanceModel(BaseModel):
     status: bool = False
     late: Optional[int]
 
-class StudentAttendanceResponseModel(BaseModel):
+class StudentAttendanceResponsModel(BaseModel):
     id: str
     full_name: str
 
@@ -23,7 +23,7 @@ class StudentAttendanceResponseModel(BaseModel):
         orm_mode = True
 
 
-@router.get("/api/attendance", response_model=List[StudentAttendanceResponseModel])
+@router.get("/api/teacher/attendance", response_model=List[StudentAttendanceResponsModel])
 def mark_attendance(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
 
     teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
@@ -33,7 +33,7 @@ def mark_attendance(db: Session = Depends(get_db), current_user: str = Depends(o
     attendance = db.query(Student).join(Lesson, Student.class_id == Lesson.class_id).filter(Lesson.teacher_id == current_user.id).all()
 
     response_data = [
-        StudentAttendanceResponseModel(
+        StudentAttendanceResponsModel(
             id=student.id,
             full_name=student.full_name,
             # Map other fields accordingly
@@ -44,7 +44,7 @@ def mark_attendance(db: Session = Depends(get_db), current_user: str = Depends(o
     return response_data
 
 
-@router.post("/api/attendance")
+@router.post("/api/teacher/attendance")
 def mark_attendance(attendance: StudentAttendanceModel, db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
 
     teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()

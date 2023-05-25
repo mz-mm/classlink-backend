@@ -2,5 +2,4 @@ databases==0.7.0
 fastapi==0.94.1
 passlib==1.7.4
 pydantic==1.10.6
-
-SQLAlchemy~=1.4.47
+SQLAlchemy==1.4.47

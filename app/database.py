@@ -81,7 +81,7 @@ class Class(Base):
     __tablename__ = "classes"
 
     id = Column(Integer, primary_key=True, nullable=False)
-    class_grade = Column(Integer, nullable=False)
+    class_grade = Column(Integer, nullable=False) # Meaning class like grade 1 to 11
     class_name = Column(String, nullable=False)
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
     sector = Column(Enum("az", "ru", name="sector"), nullable=False)
@@ -94,22 +94,11 @@ class Lesson(Base):
     id = Column(Integer, primary_key=True, nullable=False)
     class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     day = Column(Integer, nullable=False)
-
-    subject_1_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
-    subject_2_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
-    subject_3_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
-    subject_4_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
-    subject_5_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
-    subject_6_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
-
+    lesson_num = Column(Integer, nullable=False)
+    subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
 
-    subject_1 = relationship("Subject", foreign_keys=[subject_1_id], lazy='subquery', uselist=False)
-    subject_2 = relationship("Subject", foreign_keys=[subject_2_id], lazy='subquery', uselist=False)
-    subject_3 = relationship("Subject", foreign_keys=[subject_3_id], lazy='subquery', uselist=False)
-    subject_4 = relationship("Subject", foreign_keys=[subject_4_id], lazy='subquery', uselist=False)
-    subject_5 = relationship("Subject", foreign_keys=[subject_5_id], lazy='subquery', uselist=False)
-    subject_6 = relationship("Subject", foreign_keys=[subject_6_id], lazy='subquery', uselist=False)
+    subject = relationship("Subject")
 
 
 class Subject(Base):
@@ -130,7 +119,6 @@ class Attendance(Base):
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
     status = Column(Boolean, nullable=False, default=False) # True if present, False otherwise
     date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-
 
 
 
@@ -171,6 +159,11 @@ class Test(Base):
 
     date = Column(TIMESTAMP, nullable=False)
 
+
+# Before sending th user their schedule, the api will first check if there is any school event on that day on time block, if so that it will place the event next or overidde the schedule for that day/
+# for example, if there is no school day, wich will be an event in the schedule_event table, it will simply return a empty lesson for today instead of the ussal response
+# class SchoolEvents(Base):
+#     _tablename = "school_events"
 
 
 # ---- NOT READY FEATURE ----

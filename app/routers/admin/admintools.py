@@ -26,34 +26,18 @@ class LessonPostModel(BaseModel):
         orm_mode = True
 
 
-@router.post("/api/admintools/lesson", )
-def create_lesson(lesson: LessonPostModel, db: Session = Depends(get_db),
-                  current_user: str = Depends(oauth2.get_current_user)):
-    new_lesson = Lesson(**lesson.dict())
-    db.add(new_lesson)
-    db.commit()
-    db.refresh(new_lesson)
-
-    return new_lesson
-
-
 @router.get("/api/admintools/schedule")
 def create_schedule(db: Session = Depends(get_db)):
     class_id = 1
-    day = 1
-    subject_ids = [0, 0, 0, 0, 0, 0]
     teacher_id = "90b8df65-0c52-4c8c-a02a-980d16e34f69"
+    subject_id = 0
 
     for i in range(1, 8):
-        for j in range(0, 6):
-            subject_ids[j] = randint(1, 10)
-
-        day = i
-        new_lesson = Lesson(class_id=class_id, day=day, subject_1_id=subject_ids[0], subject_2_id=subject_ids[1],
-                            subject_3_id=subject_ids[2], subject_4_id=subject_ids[3], subject_5_id=subject_ids[4],
-                            subject_6_id=subject_ids[5], teacher_id=teacher_id)
-        db.add(new_lesson)
-        db.commit()
-        db.refresh(new_lesson)
+        for j in range(1, 7):
+            subject_id = randint(1, 10)
+            new_lesson = Lesson(class_id=class_id, day=i, lesson_num=j, teacher_id=teacher_id, subject_id=subject_id)
+            db.add(new_lesson)
+            db.commit()
+            db.refresh(new_lesson)
 
     return "schedule created"
