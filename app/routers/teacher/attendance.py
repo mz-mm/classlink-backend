@@ -24,21 +24,17 @@ class StudentAttendanceResponsModel(BaseModel):
 
 
 @router.get("/api/teacher/attendance", response_model=List[StudentAttendanceResponsModel])
-def mark_attendance(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
+def get_attendance(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
 
     teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
     if not teacher:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Prohibited request")
 
-    attendance = db.query(Student).join(Lesson, Student.class_id == Lesson.class_id).filter(Lesson.teacher_id == current_user.id).all()
+    student = db.query(Student).filter(Lesson.teacher_id == current_user.id).all()
 
     response_data = [
-        StudentAttendanceResponsModel(
-            id=student.id,
-            full_name=student.full_name,
+        StudentAttendanceResponsModel( id=student.id, full_name=student.full_name,) for student in student
             # Map other fields accordingly
-        )
-        for student in attendance
     ]
 
     return response_data
