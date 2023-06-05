@@ -20,6 +20,8 @@ def get_db():
     finally:
         db.close()
 
+# Each user type like parent or teacher or student should have a username prefix, like teachers will have a prefix if t in their username
+
 
 class Admin(Base):
     __tablename__ = "admins"
@@ -40,7 +42,8 @@ class Student(Base):
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
-    parent_id = Column(String, ForeignKey("parents.id", ondelete="CASCADE"), nullable=False)
+    first_parent_id = Column(String, ForeignKey("parents.id", ondelete="CASCADE"), nullable=False)
+    second_parent_id = Column(String, ForeignKey("parents.id", ondelete="CASCADE"))
     class_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False)
     sector = Column(Enum("az", "ru", name="sector"), nullable=False)
 
@@ -63,8 +66,8 @@ class Parent(Base):
 
 class Teacher(Base):
     __tablename__ = "teachers"
-
-
+    
+    # Parents that have children will need to have a separate account as parent account
     id = Column(String, primary_key=True, default=str(uuid.uuid4()), server_default=text('uuid_generate_v4()'), unique=True, nullable=False)
     email = Column(String, nullable=False, unique=True)
     full_name = Column(String, nullable=False)
@@ -167,12 +170,13 @@ class Test(Base):
 #     _tablename = "school_events"
 
 
-# ---- NOT READY FEATURE ----
-# class Message(Base):
-    # __tablename__ = "messages"
-# 
-    # id = Column(Integer, primary_key=True, nullable=False)
-    # title = Column(String, nullable=False)
-    # description = Column(String, nullable=True)
-# 
-    # date = Column(TIMESTAMP, nullable=False)    
+class Message(Base):
+    __tablename__ = "messages"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    from_id = Column(String, nullable=False)
+    to_id = Column(String, nullable=False)
+
+    date = Column(TIMESTAMP, nullable=False)    

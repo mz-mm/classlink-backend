@@ -18,6 +18,8 @@ class StudentAttendanceModel(BaseModel):
 class StudentAttendanceResponsModel(BaseModel):
     id: str
     full_name: str
+    status: bool
+    late: int
 
     class Config:
         orm_mode = True
