@@ -20,7 +20,8 @@ def get_db():
     finally:
         db.close()
 
-# Each user type like parent or teacher or student should have a username prefix, like teachers will have a prefix if t in their username
+# Each user type like parent or teacher or student should have a username prefix, like teachers will have a prefix if
+# t in their username
 
 
 class Admin(Base):
@@ -32,7 +33,6 @@ class Admin(Base):
     full_name = Column(String, nullable=False)
 
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
-
 
 
 class Student(Base):
@@ -50,7 +50,6 @@ class Student(Base):
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
 
 
-
 class Parent(Base):
     __tablename__ = "parents"
     
@@ -61,7 +60,6 @@ class Parent(Base):
 
     create_at = Column(TIMESTAMP(timezone=True),nullable=False, server_default=text('now()'))
     last_subscription_fee = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()')) # Parents will have to pay for all their children together
-
 
 
 class Teacher(Base):
@@ -78,7 +76,6 @@ class Teacher(Base):
     last_subscription_fee = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 
-
 class Class(Base):
     __tablename__ = "classes"
 
@@ -87,7 +84,6 @@ class Class(Base):
     class_name = Column(String, nullable=False)
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
     sector = Column(Enum("az", "ru", name="sector"), nullable=False)
-
 
 
 class Lesson(Base):
@@ -111,7 +107,6 @@ class Subject(Base):
     color = Column(String, nullable=False)
 
 
-
 class Attendance(Base):
     __tablename__ = "attendances"
 
@@ -121,7 +116,6 @@ class Attendance(Base):
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
     status = Column(Boolean, nullable=False, default=False) # True if present, False otherwise
     date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
-
 
 
 class SubjectGrade(Base):
@@ -138,7 +132,6 @@ class SubjectGrade(Base):
     student = relationship("Student")
 
 
-
 class Homework(Base):
     __tablename__ = "homeworks"
 
@@ -149,7 +142,6 @@ class Homework(Base):
     subject_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False)
 
     due_date = Column(TIMESTAMP, nullable=False)
-
 
 
 class Test(Base):
@@ -164,10 +156,10 @@ class Test(Base):
     date = Column(TIMESTAMP, nullable=False)
 
 
-# Before sending th user their schedule, the api will first check if there is any school event on that day on time block, if so that it will place the event next or overidde the schedule for that day/
-# for example, if there is no school day, wich will be an event in the schedule_event table, it will simply return a empty lesson for today instead of the ussal response
-# class SchoolEvents(Base):
-#     _tablename = "school_events"
+# Before sending th user their schedule, the api will first check if there is any school event on that day on time
+# block, if so that it will place the event next or override the schedule for that day/ for example, if there is no
+# school day, which will be an event in the schedule_event table, it will simply return a empty lesson for today
+# instead of the usual response class SchoolEvents(Base): _tablename = "school_events"
 
 
 class Message(Base):

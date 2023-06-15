@@ -5,6 +5,7 @@ from routers.utils import auth, user
 from routers.general import schedule
 from routers.admin import admintools
 from routers.teacher import attendance
+from rate_limit import rate_limited, Request
 
 Base.metadata.create_all(bind=engine)
 
@@ -34,7 +35,7 @@ app.include_router(attendance.router)
 app.include_router(admintools.router)
 
 
-
 @app.get("/")
-def root():
+@rate_limited(max_calls=10, time_frame=60)
+async def root(request: Request):
     return "test"
