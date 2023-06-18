@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import *
-from routers.utils import auth, user
+from routers.utils import auth
 from routers.general import schedule
 from routers.admin import admintools
 from routers.teacher import attendance
@@ -21,9 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Utils
+# Auth
 app.include_router(auth.router)
-app.include_router(user.router)
 
 # General
 app.include_router(schedule.router)

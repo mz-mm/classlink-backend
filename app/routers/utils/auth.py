@@ -3,8 +3,9 @@ from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from database import *
 from pydantic import BaseModel
-from utils import verify
+from util import verify
 import oauth2
+from rate_limit import rate_limited, Request
 from typing import Optional, Union
 
 router = APIRouter(
@@ -27,7 +28,8 @@ class TokenData(BaseModel):
 
 
 @router.post("/api/login", response_model=Token)
-def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@rate_limited(max_calls=100, time_frame=60)
+def login(request: Request, user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user: Union[Student, Teacher, Parent, Admin] = db.query(Student).filter(
         Student.email == user_credentials.username).first()
     role = "student"

@@ -115,6 +115,9 @@ class Attendance(Base):
     late = Column(Integer, nullable=True)
     teacher_id = Column(String, ForeignKey("teachers.id", ondelete="CASCADE"), nullable=False)
     status = Column(Boolean, nullable=False, default=False) # True if present, False otherwise
+    lesson_num = Column(Integer, nullable=False)
+    day = Column(Integer, nullable=False)
+
     date = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text('now()'))
 
 

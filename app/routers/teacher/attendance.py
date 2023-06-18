@@ -1,96 +1,66 @@
-from typing import Optional, List, Union
 from fastapi import Depends, APIRouter, HTTPException, status
-from pydantic import BaseModel
+from schemas.attendanceScheme import AttendanceModel_R, LessonDetailModel_P
+from database import Teacher, Student, Lesson, get_db, Attendance
+from rate_limit import rate_limited, Request
+from util import getCurrentDay
 from sqlalchemy.orm import Session
-from sqlalchemy import asc
-import database
+from sqlalchemy import asc, extract
+from typing import List
 import oauth2
 
 router = APIRouter(
     tags=["Teacher Attendance"]
 )
 
+@router.post("/api/teacher/attendance", response_model=List[AttendanceModel_R])
+@rate_limited(max_calls=100, time_frame=60)
+def mark_attendance(request: Request, lessonDetail: LessonDetailModel_P, db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
 
-class StudentAttendanceResponsModel(BaseModel):
-    id: str
-    full_name: str
+    day = 3 # ONLY FOR DEVELOPMENT
 
-    class Config:
-        orm_mode = True
+    students = []
+    # uncomment for production
+    # day = getCurrentDay(lessonDetail.day)
 
-
-# @router.get("/api/teacher/attendance", response_model=List[StudentAttendanceResponsModel])
-# def get_attendance(db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
-
-#     teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
-#     if not teacher:
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Prohibited request")
-
-#     student = db.query(Student).filter(Lesson.teacher_id == current_user.id).all()
-
-#     response_data = [
-#         StudentAttendanceResponsModel( id=student.id, full_name=student.full_name,) for student in student
-#             # Map other fields accordingly
-#     ]
-
-#     return response_data
-
-
-# @router.post("/api/teacher/attendance")
-# def mark_attendance(attendance: StudentAttendanceModel, db: Session = Depends(get_db), current_user: str = Depends(oauth2.get_current_user)):
-
-#     teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
-#     if not teacher:
-#         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Prohibited request")
-
-#     new_attendance = Attendance(student_id=attendance.id, teacher_id=teacher.id, status=attendance.status ,late=attendance.late)
-#     db.add(new_attendance)
-#     db.commit()
-#     db.refresh(new_attendance)
-
-#     return new_attendance
-
-
-class StudentAttendanceModel(BaseModel):
-    current_day: str
-    current_lesson: int
-    date: str
-
-
-@router.post("/api/teacher/attendance", response_model=List[StudentAttendanceResponsModel])
-def mark_attendance(attendance: StudentAttendanceModel, db: Session = Depends(database.get_db),
-                    current_user: str = Depends(oauth2.get_current_user)):
-    day = 3
-
-    # if attendance.current_day == "Tuesday":
-    #     day = 2
-    # elif attendance.current_day == "Wednesday":
-    #     day = 3
-    # elif attendance.current_day == "Thursday":
-    #     day = 4
-    # elif attendance.current_day == "Friday":
-    #     day = 5
-    # elif attendance.current_day == "Saturday":
-    #     day = 6
-
-    teacher = db.query(database.Teacher).filter(database.Teacher.id == current_user.id).first()
-
+    teacher = db.query(Teacher).filter(Teacher.id == current_user.id).first()
     if not teacher:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Prohibited request")
 
-    student = db.query(database.Student). \
-        join(database.Lesson, database.Student.class_id == database.Lesson.class_id).filter(
-        database.Lesson.day == day,
-        database.Lesson.lesson_num == attendance.current_lesson,
-        database.Lesson.teacher_id == current_user.id
-    ).order_by(asc(database.Student.full_name)).all()
+    attendance:Attendance = db.query(Attendance).filter(
+        Attendance.teacher_id == teacher.id,
+        extract('year', Attendance.date) == lessonDetail.year,
+        extract('month', Attendance.date) == lessonDetail.month,
+        extract('day', Attendance.date) == lessonDetail.day,
+        Attendance.day == day,
+        Attendance.lesson_num == lessonDetail.current_lesson
+    ).all()
 
-    if not student:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Ваши уроки еще не начались или уже закончились")
+    if attendance:
+        for student in attendance:
+            query = db.query(Student).filter(Student.id == student.student_id).first()
+            students.append(query)
+
+    else:
+        attendance = db.query(Student).join(Lesson, Student.class_id == Lesson.class_id).filter(
+        Lesson.day == day, Lesson.lesson_num == lessonDetail.current_lesson,
+        Lesson.teacher_id == current_user.id).order_by(asc(Student.full_name)).all()
+
+        if not attendance:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Ваши уроки еще не начались или уже закончились")
+        
+        for student in attendance:
+            new_attendance = Attendance(student_id=student.id, teacher_id=teacher.id, lesson_num=lessonDetail.current_lesson, day=day)
+            db.add(new_attendance)
+            db.commit()
+            db.refresh(new_attendance)
+
+            query = db.query(Student).filter(Student.id == new_attendance.student_id).first()
+            students.append(query)
+        
+
 
     response_data = [
-        StudentAttendanceResponsModel(id=student.id, full_name=student.full_name) for student in student
+        AttendanceModel_R(id=student.id, full_name=student.full_name) for student in students
     ]
 
     return response_data
